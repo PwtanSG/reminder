@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-const EditTask = ({ onAdd }) => {
-
-    const [title, setTitle] = useState('');
-    const [day, setDay] = useState('');
-    const [reminder, setReminder] = useState(false);
+const EditTask = ({ editTask,  onSaveEditTask}) => {
+    //const [taskId, setTaskId] = useState(editTask.id);
+    const taskId = editTask.id;
+    const [title, setTitle] = useState(editTask.title);
+    const [day, setDay] = useState(editTask.day);
+    const [reminder, setReminder] = useState(editTask.reminder);
 
     const onSubmit = (e) => {
         //prevent submit to a page
@@ -14,9 +15,9 @@ const EditTask = ({ onAdd }) => {
             alert('Please enter all fields');
             return;
         }
-        console.log({title:title, day:day, reminder: reminder})
-        console.log(title)
-        onAdd({title, day, reminder});
+        //console.log({title:title, day:day, reminder: reminder})
+        //console.log(title)
+        onSaveEditTask({taskId, title, day, reminder});
 
         //clear form input
         setTitle('');
@@ -27,6 +28,9 @@ const EditTask = ({ onAdd }) => {
     return(
         
         <form className="add-form" onSubmit={onSubmit}>
+            <div className="form-control">
+                <label>{'id:' + taskId}</label>
+            </div>
             <div className="form-control">
                 <label>Task</label>
                 <input 

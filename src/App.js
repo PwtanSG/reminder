@@ -6,10 +6,13 @@ import Footer from './components/Footer'
 import Tasks from './components/Tasks'
 import AddTask from './components/AddTask';
 import About from './components/About';
+import EditTask from './components/EditTask';
 
 
 function App() {
   const [showAddTask, setShowAddTask] = useState(false);
+  const [showEditTask, setShowEditTask] = useState(false);
+  const [edTask, setEdTask] = useState({});
   const [tasks, setTasks] = useState([]);
 
   useEffect(()=> {
@@ -51,6 +54,7 @@ function App() {
     const allTasks = await fetchTasks();
     //setTasks([...tasks, newTask]);
     setTasks(allTasks);
+    setShowAddTask(false);
     //console.log(newTask)
   }
 
@@ -60,6 +64,24 @@ function App() {
       method:'DELETE'
     });
     setTasks(tasks.filter((task) => task.id !== id))
+  }
+
+  const editTask = (task) => {
+    setEdTask(task);
+    setShowEditTask(!showEditTask);
+    setShowAddTask(false);
+  }
+
+  const onSaveEditTask = async(task) => {
+    setShowEditTask(false);
+    const editedTask = {title:task.title, day:task.day, reminder:task.reminder} 
+    const res = await fetch(`http://localhost:5000/tasks/${task.taskId}`, {
+      method: 'PUT',
+      headers: {'Content-type': 'application/json'},
+      body:JSON.stringify(editedTask)
+    })
+    const allTasks = await fetchTasks();
+    setTasks(allTasks);
   }
 
   const toggleReminder = async (id) => {
@@ -85,13 +107,10 @@ function App() {
   return (
     <Router>
       <div className="container">
-          <Header title='Task tracker' onAdd={()=>setShowAddTask(!showAddTask)} showAddTask={showAddTask}/>
+          <Header title='Task tracker' onAdd={()=>setShowAddTask(!showAddTask)} showAddTask={showAddTask} showEditTask={showEditTask} onBack={()=>setShowEditTask(!showEditTask)}/>
+          {showEditTask && <EditTask editTask = {edTask} onSaveEditTask={onSaveEditTask} />}
           {showAddTask && <AddTask onAdd = {addTask}/>}
-          {tasks.length>0? (<Tasks tasks={tasks} onDelete={deleteTask} onToggle={toggleReminder}/>) : 'No tasks found.'}
-          <Routes>
-            <Route path='/about' element={<About />} />
-          </Routes>
-          
+          {!showEditTask && tasks.length>0? (<Tasks tasks={tasks} onDelete={deleteTask} onEdit={editTask} onToggle={toggleReminder}/>) : showEditTask? '' : 'No tasks found.'}         
           <Footer />
 
       </div>
